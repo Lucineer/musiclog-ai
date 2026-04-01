@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>musiclog.ai — Your AI Practice Captain</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-input: #0f3460;
+      --amber: #F59E0B;
+      --amber-dim: #92610a;
+      --text: #f0f0f0;
+      --text-muted: #8899aa;
+      --green: #10b981;
+      --red: #ef4444;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ---- Layout ---- */
+    header {
+      background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+      border-bottom: 1px solid #222;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--amber);
+      letter-spacing: -0.5px;
+    }
+
+    .logo span { color: var(--text); font-weight: 300; }
+
+    nav { display: flex; gap: 0.25rem; }
+
+    nav button {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    nav button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    nav button.active { color: var(--amber); background: rgba(245,158,11,0.1); }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ---- Cards ---- */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid #222;
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: var(--amber);
+    }
+
+    .card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ---- Stat Grid ---- */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-box {
+      background: var(--bg-input);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      text-align: center;
+    }
+
+    .stat-box .value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--amber);
+    }
+
+    .stat-box .label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 0.25rem;
+    }
+
+    /* ---- Forms ---- */
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      background: var(--bg-input);
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--amber);
+    }
+
+    textarea { resize: vertical; min-height: 60px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    button.primary, input[type="submit"] {
+      background: var(--amber);
+      color: #000;
+      border: none;
+      padding: 0.65rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button.primary:hover { opacity: 0.85; }
+
+    /* ---- Timer ---- */
+    .timer-display {
+      font-size: 4rem;
+      font-weight: 800;
+      text-align: center;
+      color: var(--amber);
+      font-variant-numeric: tabular-nums;
+      padding: 2rem 0;
+      text-shadow: 0 0 40px rgba(245,158,11,0.3);
+    }
+
+    .timer-controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .timer-controls button {
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      border: none;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .btn-start { background: var(--green); color: #000; }
+    .btn-stop { background: var(--red); color: #fff; }
+    .btn-reset { background: #333; color: var(--text); }
+
+    /* ---- Song Grid ---- */
+    .song-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .song-card {
+      background: var(--bg-input);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+
+    .song-card .title { font-weight: 700; font-size: 1rem; }
+    .song-card .artist { color: var(--text-muted); font-size: 0.85rem; }
+
+    .progress-bar {
+      background: #222;
+      border-radius: 4px;
+      height: 6px;
+      margin-top: 0.75rem;
+      overflow: hidden;
+    }
+
+    .progress-bar .fill {
+      height: 100%;
+      background: var(--amber);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .difficulty-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-top: 0.5rem;
+    }
+
+    .difficulty-beginner { background: #065f46; color: #6ee7b7; }
+    .difficulty-intermediate { background: #713f12; color: #fcd34d; }
+    .difficulty-advanced { background: #7f1d1d; color: #fca5a5; }
+
+    /* ---- Chat ---- */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 200px);
+      min-height: 400px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
+    .msg {
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      max-width: 85%;
+      line-height: 1.5;
+    }
+
+    .msg.user {
+      background: var(--bg-input);
+      margin-left: auto;
+      border-bottom-right-radius: 2px;
+    }
+
+    .msg.assistant {
+      background: #1e293b;
+      border-bottom-left-radius: 2px;
+    }
+
+    .msg code {
+      background: rgba(245,158,11,0.1);
+      color: var(--amber);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    .chat-input-area {
+      display: flex;
+      gap: 0.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #222;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    /* ---- Theory Explorer ---- */
+    .theory-cats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .theory-cats button {
+      background: var(--bg-input);
+      border: 1px solid #333;
+      color: var(--text-muted);
+      padding: 0.4rem 0.85rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .theory-cats button.active {
+      background: var(--amber);
+      color: #000;
+      border-color: var(--amber);
+    }
+
+    .topic-list { display: flex; flex-direction: column; gap: 1rem; }
+
+    .topic-item {
+      background: var(--bg-input);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .topic-item:hover { border-color: var(--amber-dim); }
+    .topic-item .name { font-weight: 700; margin-bottom: 0.25rem; }
+    .topic-item .summary { color: var(--text-muted); font-size: 0.85rem; }
+
+    .topic-detail { display: none; }
+    .topic-detail.active { display: block; }
+    .topic-detail pre {
+      background: #0a0a1a;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--amber);
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      padding: 0;
+    }
+
+    /* ---- Insights ---- */
+    .insight-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .insight-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--bg-input);
+      padding: 1rem;
+      border-radius: var(--radius);
+    }
+
+    .insight-icon {
+      font-size: 1.5rem;
+      width: 40px;
+      text-align: center;
+    }
+
+    .insight-text .title { font-weight: 700; font-size: 0.9rem; }
+    .insight-text .desc { color: var(--text-muted); font-size: 0.8rem; }
+
+    /* ---- Review ---- */
+    .review-item {
+      background: var(--bg-input);
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin-bottom: 0.75rem;
+    }
+
+    .review-item .piece { font-weight: 700; }
+    .review-item .meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .review-item .rec { font-size: 0.85rem; margin-top: 0.5rem; }
+
+    .urgency-overdue { border-left: 3px solid var(--red); }
+    .urgency-due { border-left: 3px solid var(--amber); }
+    .urgency-fresh { border-left: 3px solid var(--green); }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 640px) {
+      header { padding: 0.75rem 1rem; flex-direction: column; gap: 0.75rem; }
+      main { padding: 1rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .timer-display { font-size: 3rem; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">musiclog<span>.ai</span></div>
+  <nav>
+    <button class="active" data-tab="dashboard">Dashboard</button>
+    <button data-tab="practice">Practice</button>
+    <button data-tab="songs">Songs</button>
+    <button data-tab="theory">Theory</button>
+    <button data-tab="chat">Chat</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ========== DASHBOARD ========== -->
+  <div id="dashboard" class="tab-content active">
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="value" id="stat-streak">0</div>
+        <div class="label">Day Streak</div>
+      </div>
+      <div class="stat-box">
+        <div class="value" id="stat-sessions">0</div>
+        <div class="label">Sessions</div>
+      </div>
+      <div class="stat-box">
+        <div class="value" id="stat-minutes">0</div>
+        <div class="label">Total Min</div>
+      </div>
+      <div class="stat-box">
+        <div class="value" id="stat-weekly">0</div>
+        <div class="label">This Week</div>
+      </div>
+      <div class="stat-box">
+        <div class="value" id="stat-pieces">0</div>
+        <div class="label">Pieces</div>
+      </div>
+      <div class="stat-box">
+        <div class="value" id="stat-rating">—</div>
+        <div class="label">Avg Rating</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Insights</h2>
+      <div id="insights-container" class="insight-list">
+        <div class="insight-item"><div class="insight-icon">🎵</div><div class="insight-text"><div class="title">Get started</div><div class="desc">Log your first practice session to see insights.</div></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Spaced Repetition</h2>
+      <div id="review-container">
+        <p style="color:var(--text-muted)">Pieces you've practiced will appear here with review reminders.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Weekly Goals</h2>
+      <div id="goals-container">
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+          <input type="number" id="goal-minutes" placeholder="Target minutes" min="1" style="flex:1">
+          <button class="primary" onclick="addGoal()">Set Goal</button>
+        </div>
+        <div id="goals-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PRACTICE ========== -->
+  <div id="practice" class="tab-content">
+    <div class="card">
+      <h2>Practice Timer</h2>
+      <div class="timer-display" id="timer">00:00</div>
+      <div class="timer-controls">
+        <button class="btn-start" onclick="startTimer()">Start</button>
+        <button class="btn-stop" onclick="stopTimer()">Stop</button>
+        <button class="btn-reset" onclick="resetTimer()">Reset</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Log a Session</h2>
+      <form id="practice-form" onsubmit="logSession(event)">
+        <div class="form-row">
+          <div>
+            <label>Date</label>
+            <input type="date" id="s-date" required>
+          </div>
+          <div>
+            <label>Duration (min)</label>
+            <input type="number" id="s-duration" min="1" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Instrument</label>
+            <input type="text" id="s-instrument" placeholder="Piano, Guitar, Voice..." required>
+          </div>
+          <div>
+            <label>Rating (1-5)</label>
+            <select id="s-rating">
+              <option value="5">5 — Great</option>
+              <option value="4">4 — Good</option>
+              <option value="3" selected>3 — OK</option>
+              <option value="2">2 — Meh</option>
+              <option value="1">1 — Rough</option>
+            </select>
+          </div>
+        </div>
+        <label>Pieces (comma separated)</label>
+        <input type="text" id="s-pieces" placeholder="Fur Elise, Clair de Lune...">
+        <label>Focus Areas</label>
+        <input type="text" id="s-focus" placeholder="Scales, arpeggios, sight-reading...">
+        <label>Notes</label>
+        <textarea id="s-notes" placeholder="How did it go?"></textarea>
+        <button type="submit" class="primary">Log Session</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Recent Sessions</h2>
+      <div id="sessions-list"></div>
+    </div>
+  </div>
+
+  <!-- ========== SONGS ========== -->
+  <div id="songs" class="tab-content">
+    <div class="card">
+      <h2>Add Song</h2>
+      <form onsubmit="addSong(event)">
+        <div class="form-row">
+          <div>
+            <label>Title</label>
+            <input type="text" id="song-title" required>
+          </div>
+          <div>
+            <label>Artist</label>
+            <input type="text" id="song-artist" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Difficulty</label>
+            <select id="song-difficulty">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate" selected>Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+          <div>
+            <label>Progress (%)</label>
+            <input type="number" id="song-progress" min="0" max="100" value="0">
+          </div>
+        </div>
+        <label>Instrument</label>
+        <input type="text" id="song-instrument" placeholder="Optional">
+        <button type="submit" class="primary">Add Song</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Repertoire</h2>
+      <div id="song-grid" class="song-grid">
+        <p style="color:var(--text-muted)">Your repertoire is empty. Add songs above!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== THEORY ========== -->
+  <div id="theory" class="tab-content">
+    <div class="card">
+      <h2>Theory Explorer</h2>
+      <div class="theory-cats" id="theory-cats">
+        <button class="active" data-cat="all">All</button>
+        <button data-cat="scales">Scales</button>
+        <button data-cat="chords">Chords</button>
+        <button data-cat="intervals">Intervals</button>
+        <button data-cat="progressions">Progressions</button>
+        <button data-cat="modes">Modes</button>
+        <button data-cat="rhythm">Rhythm</button>
+      </div>
+      <div id="theory-list" class="topic-list"></div>
+      <div id="theory-detail" class="topic-detail"></div>
+    </div>
+
+    <div class="card">
+      <h2>Quick Analysis</h2>
+      <p style="color:var(--text-muted);margin-bottom:1rem;font-size:0.85rem">Ask about chords or scales, e.g. "what scale goes with Am7-Dm7-G7-CM7?"</p>
+      <div style="display:flex;gap:0.5rem">
+        <input type="text" id="theory-query" placeholder="Am7 - Dm7 - G7 - Cmaj7">
+        <button class="primary" onclick="analyzeTheory()">Analyze</button>
+      </div>
+      <div id="theory-result" style="margin-top:1rem"></div>
+    </div>
+
+    <div class="card">
+      <h2>Ear Training</h2>
+      <div id="ear-training-list"></div>
+    </div>
+  </div>
+
+  <!-- ========== CHAT ========== -->
+  <div id="chat" class="tab-content">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+          <div class="msg assistant">
+            Hey! I'm your musiclog.ai captain. Ask me about scales, chords, practice strategies, or anything music-related.
+            Try: <code>What scale goes with Am7-Dm7-G7-CM7?</code>
+          </div>
+        </div>
+        <div style="padding:1rem">
+          <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Ask about music theory, practice tips..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="primary" onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const API = '';
+
+// ---- Tab Navigation ----
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---- Timer ----
+let timerStart = null, timerElapsed = 0, timerInterval = null;
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const s = (sec % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function startTimer() {
+  if (timerInterval) return;
+  timerStart = Date.now() - timerElapsed * 1000;
+  timerInterval = setInterval(() => {
+    timerElapsed = Math.floor((Date.now() - timerStart) / 1000);
+    document.getElementById('timer').textContent = formatTime(timerElapsed);
+  }, 200);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  document.getElementById('s-duration').value = Math.ceil(timerElapsed / 60);
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerElapsed = 0;
+  timerStart = null;
+  document.getElementById('timer').textContent = '00:00';
+}
+
+// ---- Practice Sessions ----
+document.getElementById('s-date').value = new Date().toISOString().slice(0, 10);
+
+async function logSession(e) {
+  e.preventDefault();
+  const body = {
+    date: document.getElementById('s-date').value,
+    duration: parseInt(document.getElementById('s-duration').value),
+    instrument: document.getElementById('s-instrument').value,
+    rating: parseInt(document.getElementById('s-rating').value),
+    pieces: document.getElementById('s-pieces').value.split(',').map(s => s.trim()).filter(Boolean),
+    focusAreas: document.getElementById('s-focus').value.split(',').map(s => s.trim()).filter(Boolean),
+    notes: document.getElementById('s-notes').value,
+  };
+  const res = await fetch(`${API}/api/practice`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (res.ok) {
+    document.getElementById('practice-form').reset();
+    document.getElementById('s-date').value = new Date().toISOString().slice(0, 10);
+    resetTimer();
+    loadSessions();
+    loadDashboard();
+  }
+}
+
+async function loadSessions() {
+  const res = await fetch(`${API}/api/practice`);
+  const sessions = await res.json();
+  const el = document.getElementById('sessions-list');
+  if (!sessions.length) { el.innerHTML = '<p style="color:var(--text-muted)">No sessions logged yet.</p>'; return; }
+  el.innerHTML = sessions.slice(0, 10).map(s => `
+    <div class="review-item" style="border-left:3px solid var(--amber)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="piece">${s.instrument}</span>
+        <span style="color:var(--text-muted);font-size:0.8rem">${s.date}</span>
+      </div>
+      <div class="meta">${s.duration} min${s.pieces.length ? ' — ' + s.pieces.join(', ') : ''} — Rating: ${'★'.repeat(s.rating)}</div>
+      ${s.notes ? `<div style="font-size:0.85rem;margin-top:0.25rem;color:var(--text-muted)">${s.notes}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+// ---- Songs ----
+async function addSong(e) {
+  e.preventDefault();
+  const body = {
+    title: document.getElementById('song-title').value,
+    artist: document.getElementById('song-artist').value,
+    difficulty: document.getElementById('song-difficulty').value,
+    progress: parseInt(document.getElementById('song-progress').value),
+    instrument: document.getElementById('song-instrument').value,
+  };
+  const res = await fetch(`${API}/api/songs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (res.ok) {
+    e.target.reset();
+    loadSongs();
+    loadDashboard();
+  }
+}
+
+async function loadSongs() {
+  const res = await fetch(`${API}/api/songs`);
+  const songs = await res.json();
+  const el = document.getElementById('song-grid');
+  if (!songs.length) { el.innerHTML = '<p style="color:var(--text-muted)">Your repertoire is empty. Add songs above!</p>'; return; }
+  el.innerHTML = songs.map(s => `
+    <div class="song-card">
+      <div class="title">${s.title}</div>
+      <div class="artist">${s.artist}</div>
+      <span class="difficulty-badge difficulty-${s.difficulty}">${s.difficulty}</span>
+      <div class="progress-bar"><div class="fill" style="width:${s.progress}%"></div></div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.35rem">${s.progress}% learned</div>
+    </div>
+  `).join('');
+}
+
+// ---- Theory ----
+let allTopics = [];
+
+async function loadTheory(cat) {
+  const url = cat && cat !== 'all' ? `${API}/api/theory?category=${cat}` : `${API}/api/theory`;
+  const res = await fetch(url);
+  allTopics = await res.json();
+  renderTopics(allTopics);
+}
+
+function renderTopics(topics) {
+  const el = document.getElementById('theory-list');
+  document.getElementById('theory-detail').classList.remove('active');
+  el.style.display = '';
+  el.innerHTML = topics.map(t => `
+    <div class="topic-item" onclick="showTopic('${t.id}')">
+      <div class="name">${t.name}</div>
+      <div class="summary">${t.summary}</div>
+    </div>
+  `).join('');
+}
+
+async function showTopic(id) {
+  const res = await fetch(`${API}/api/theory?id=${id}`);
+  const t = await res.json();
+  document.getElementById('theory-list').style.display = 'none';
+  const el = document.getElementById('theory-detail');
+  el.innerHTML = `
+    <button class="back-btn" onclick="loadTheory()">← Back to topics</button>
+    <h2 style="color:var(--amber);margin-bottom:1rem">${t.name}</h2>
+    <pre>${t.detail}</pre>
+    <h3 style="margin-top:1rem">Examples</h3>
+    ${t.examples.map(e => `<div style="background:var(--bg-input);padding:0.5rem 0.75rem;border-radius:6px;margin-bottom:0.5rem;font-family:monospace;font-size:0.85rem">${e}</div>`).join('')}
+    ${t.relatedTopics.length ? `<p style="margin-top:1rem;color:var(--text-muted);font-size:0.85rem">Related: ${t.relatedTopics.map(r => `<a href="#" onclick="showTopic('${r}');return false" style="color:var(--amber)">${r}</a>`).join(', ')}</p>` : ''}
+  `;
+  el.classList.add('active');
+}
+
+document.querySelectorAll('#theory-cats button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#theory-cats button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadTheory(btn.dataset.cat);
+  });
+});
+
+async function analyzeTheory() {
+  const q = document.getElementById('theory-query').value;
+  if (!q) return;
+  const res = await fetch(`${API}/api/theory?q=${encodeURIComponent(q)}`);
+  const data = await res.json();
+  document.getElementById('theory-result').innerHTML = data.analysis
+    ? `<pre style="background:#0a0a1a;padding:1rem;border-radius:8px;white-space:pre-wrap;line-height:1.6">${data.analysis}</pre>`
+    : `<pre style="background:#0a0a1a;padding:1rem;border-radius:8px;white-space:pre-wrap;line-height:1.6">${data.explanation}</pre>`;
+}
+
+async function loadEarTraining() {
+  const res = await fetch(`${API}/api/theory/ear-training`);
+  const exercises = await res.json();
+  const el = document.getElementById('ear-training-list');
+  el.innerHTML = exercises.map(e => `
+    <div class="review-item" style="border-left:3px solid var(--amber)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="piece">${e.description.slice(0, 60)}...</span>
+        <span class="difficulty-badge difficulty-${e.difficulty}">${e.difficulty}</span>
+      </div>
+      <div class="meta">${e.type} — ${e.hint}</div>
+    </div>
+  `).join('');
+}
+
+// ---- Chat ----
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const messages = document.getElementById('chat-messages');
+  messages.innerHTML += `<div class="msg user">${escHtml(msg)}</div>`;
+
+  try {
+    const res = await fetch(`${API}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg }),
+    });
+
+    if (!res.ok) throw new Error('Chat API error');
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let assistantEl = null;
+    let fullText = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+      for (const line of lines) {
+        const data = line.slice(6);
+        if (data === '[DONE]') break;
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.error) {
+            fullText += `Error: ${parsed.error}`;
+          } else if (parsed.content) {
+            fullText += parsed.content;
+          }
+          if (!assistantEl) {
+            messages.innerHTML += `<div class="msg assistant">${escHtml(fullText)}</div>`;
+            assistantEl = messages.lastElementChild;
+          } else {
+            assistantEl.innerHTML = renderMd(fullText);
+          }
+          messages.scrollTop = messages.scrollHeight;
+        } catch {}
+      }
+    }
+  } catch (err) {
+    messages.innerHTML += `<div class="msg assistant" style="color:var(--red)">Connection error — is the server running?</div>`;
+  }
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderMd(text) {
+  return escHtml(text)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+// ---- Goals ----
+async function addGoal() {
+  const mins = parseInt(document.getElementById('goal-minutes').value);
+  if (!mins) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const weekEnd = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+  await fetch(`${API}/api/practice/goals`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'weekly', targetMinutes: mins, startDate: today, endDate: weekEnd, label: `${mins} min/week` }),
+  });
+  document.getElementById('goal-minutes').value = '';
+  loadGoals();
+}
+
+async function loadGoals() {
+  const res = await fetch(`${API}/api/practice/goals`);
+  const goals = await res.json();
+  const el = document.getElementById('goals-list');
+  if (!goals.length) { el.innerHTML = '<p style="color:var(--text-muted)">No goals set yet.</p>'; return; }
+  el.innerHTML = goals.map(g => {
+    const pct = Math.min(100, Math.round(g.currentMinutes / g.targetMinutes * 100));
+    return `
+      <div style="margin-bottom:0.75rem">
+        <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.25rem">
+          <span>${g.label}</span>
+          <span style="color:var(--text-muted)">${g.currentMinutes}/${g.targetMinutes} min</span>
+        </div>
+        <div class="progress-bar"><div class="fill" style="width:${pct}%;background:${pct>=100?'var(--green)':'var(--amber)'}"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ---- Dashboard ----
+async function loadDashboard() {
+  try {
+    const [stats, insights, reviews] = await Promise.all([
+      fetch(`${API}/api/progress`).then(r => r.json()),
+      fetch(`${API}/api/practice/insights`).then(r => r.json()),
+      fetch(`${API}/api/practice/review`).then(r => r.json()),
+    ]);
+
+    document.getElementById('stat-streak').textContent = stats.streak?.current ?? 0;
+    document.getElementById('stat-sessions').textContent = stats.totalSessions ?? 0;
+    document.getElementById('stat-minutes').textContent = stats.totalMinutes ?? 0;
+    document.getElementById('stat-weekly').textContent = stats.weeklyMinutes ?? 0;
+    document.getElementById('stat-pieces').textContent = stats.pieces?.length ?? 0;
+    document.getElementById('stat-rating').textContent = stats.avgRating || '—';
+
+    if (insights.length) {
+      document.getElementById('insights-container').innerHTML = insights.map(i => `
+        <div class="insight-item">
+          <div class="insight-icon">🎵</div>
+          <div class="insight-text">
+            <div class="title">${i.title}</div>
+            <div class="desc">${i.description}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    if (reviews.length) {
+      document.getElementById('review-container').innerHTML = reviews.map(r => `
+        <div class="review-item urgency-${r.urgency}">
+          <div class="piece">${r.piece}</div>
+          <div class="meta">Last practiced: ${r.lastPracticed} (${r.daysSince} days ago)</div>
+          <div class="rec">${r.recommendation}</div>
+        </div>
+      `).join('');
+    }
+  } catch {}
+}
+
+// ---- Init ----
+loadDashboard();
+loadSessions();
+loadSongs();
+loadTheory();
+loadEarTraining();
+loadGoals();
+</script>
+
+</body>
+</html>
