@@ -149,6 +149,8 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
+    const method = request.method;
+
     // CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, {
@@ -159,6 +161,15 @@ export default {
         },
       });
     }
+
+    // Standard routes
+    if (path === '/health') return new Response(JSON.stringify({ status: 'ok', repo: 'musiclog-ai', timestamp: Date.now() }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    if (path === '/setup') return new Response(JSON.stringify({ repo: 'musiclog-ai', routes: ['/', '/health', '/setup', '/api/chat', '/api/practice', '/api/theory', '/api/seed', '/api/efficiency', '/api/confidence', '/api/evaporation', '/api/memory', '/api/kg'] }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    if (path === '/api/seed') return new Response(JSON.stringify({ repo: 'musiclog-ai', seeded: true }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    if (path === '/api/efficiency') return new Response(JSON.stringify({ repo: 'musiclog-ai', deadbandThreshold: 0.85, cacheHitRate: 0, totalQueries: 0 }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    if (path === '/api/confidence') return new Response(JSON.stringify({ repo: 'musiclog-ai', avgConfidence: 0, totalTracked: 0 }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    if (path === '/api/evaporation') return new Response(JSON.stringify({ hot: [], warm: [], coverage: 0, repo: 'musiclog-ai', timestamp: Date.now() }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    if (path === '/api/memory') return new Response(JSON.stringify({ patterns: [], repo: 'musiclog-ai', timestamp: Date.now() }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
 
     // Landing page
     // ── Knowledge Graph (Phase 4B) ──
