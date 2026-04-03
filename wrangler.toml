@@ -4,3 +4,7 @@ compatibility_date = "2024-05-29"
 
 [vars]
 DEEPSEEK_MODEL = "deepseek-chat"
+
+[[kv_namespaces]]
+binding = "KG"
+id = "c7886204c80845c6b9568693ed277b75"
