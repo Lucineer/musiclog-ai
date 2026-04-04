@@ -1,4 +1,5 @@
 name = "musiclog-ai"
+account_id = "049ff5e84ecf636b53b162cbb580aae6"
 main = "src/worker.ts"
 compatibility_date = "2024-05-29"
 
@@ -7,7 +8,7 @@ DEEPSEEK_MODEL = "deepseek-chat"
 
 [[kv_namespaces]]
 binding = "KG"
-id = "c7886204c80845c6b9568693ed277b75"
+id = "97fecbd575ad41ed8aae56e69ad19d86"
 
 
 
