@@ -1,83 +1,111 @@
-# musiclog.ai
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lucineer/capitaine/master/docs/capitaine-logo.jpg" alt="Capitaine" width="120">
+</p>
 
-A repo-native AI agent for musicians. Practice tracking, theory explanations, repertoire management, and an AI captain that guides your musical journey.
+<h1 align="center">musiclog-ai</h1>
 
-## What it does
+<p align="center">Music companion vessel.</p>
 
-- **Practice Timer & Logging** — Time sessions, track instrument/pieces/focus areas, rate your sessions
-- **Streak Tracking** — Consecutive day streaks with visual feedback
-- **Spaced Repetition** — Suggests pieces to revisit based on forgetting curves
-- **Practice Insights** — Patterns in when/what/how you practice
-- **Weekly Goals** — Set minute targets, track completion with progress bars
-- **Song Repertoire** — Grid view of songs with difficulty badges and progress bars
-- **Theory Explorer** — Scales, chords, intervals, progressions, modes with detailed explanations
-- **Chord Analysis** — Ask "what scale goes with Am7-Dm7-G7-CM7?" and get a breakdown
-- **Ear Training** — Progressive exercises from beginner to advanced
-- **Composition Aids** — Chord progressions, melodic ideas, rhythm suggestions in any key
-- **AI Chat** — SSE streaming with DeepSeek for real-time music theory Q&A
+<p align="center">
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#the-fleet">The Fleet</a> ·
+  <a href="https://github.com/Lucineer/musiclog-ai/issues">Issues</a>
+</p>
 
-## Stack
+---
 
-- **Runtime**: Cloudflare Workers (TypeScript)
-- **AI**: DeepSeek API (streaming SSE)
-- **Frontend**: Single-page HTML, dark stage aesthetic
-- **No build step** — pure TypeScript, no bundler needed
+**Powered by [Capitaine](https://github.com/Lucineer/capitaine) · [Cocapn](https://github.com/Lucineer/cocapn)**
 
-## Setup
+The repo IS the agent. musiclog-ai is a cocapn vessel — a self-improving repository that runs on Cloudflare Workers, thinks with LLMs, and coordinates with the fleet through git.
+
+## Quick Start
 
 ```bash
-# Install dependencies
-npm install
-
-# Set your DeepSeek API key
-npx wrangler secret put DEEPSEEK_API_KEY
-
-# Run locally
-npm run dev
-
-# Deploy to Cloudflare
-npm run deploy
+# Fork and deploy
+gh repo fork Lucineer/musiclog-ai --clone
+cd musiclog-ai
+npx wrangler login
+echo "your-github-token" | npx wrangler secret put GITHUB_TOKEN
+echo "your-llm-key" | npx wrangler secret put DEEPSEEK_API_KEY
+npx wrangler deploy
 ```
 
-## API Endpoints
+That's it. The vessel is alive.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/chat` | SSE streaming chat with DeepSeek |
-| `GET/POST` | `/api/practice` | List / log practice sessions |
-| `GET/POST` | `/api/practice/goals` | Weekly practice goals |
-| `GET` | `/api/practice/streak` | Current and longest streak |
-| `GET` | `/api/practice/review` | Spaced repetition suggestions |
-| `GET` | `/api/practice/insights` | Practice pattern insights |
-| `GET/POST` | `/api/songs` | Song repertoire CRUD |
-| `GET` | `/api/theory` | Theory topics (filterable by category) |
-| `GET` | `/api/theory?id=X` | Single topic detail |
-| `GET` | `/api/theory?q=...` | Contextual theory explanation |
-| `GET` | `/api/theory/ear-training` | Ear training exercises |
-| `GET` | `/api/theory/compose` | Composition aids |
-| `GET` | `/api/progress` | Aggregate progress statistics |
+## Features
 
-## Design
+- **BYOK v2** — Zero keys in code. All API keys via Cloudflare Secrets Store.
+- **Multi-model** — DeepSeek, SiliconFlow, DeepInfra, Moonshot, z.ai, local models.
+- **Session memory** — Conversations persist and build context over time.
+- **PII safety** — Automatic detection and dehydration of sensitive data.
+- **Rate limiting** — Guest tokens per IP with configurable limits.
+- **Health checks** — Standard `/health` endpoint on all vessels.
+- **Fleet coordination** — CRP-39 protocol for trust, bonds, and events.
 
-Dark stage aesthetic: `#1a1a2e` background, amber `#F59E0B` accents, warm white text. Music notation feel throughout. Responsive layout works on mobile and desktop.
+## Architecture
 
-## Project Structure
+Single-file Cloudflare Worker. Zero runtime dependencies. Inline HTML serving.
 
 ```
 src/
-  worker.ts           — Cloudflare Worker router + all API endpoints
-  practice/
-    tracker.ts         — Sessions, streaks, goals, spaced repetition, insights
-  theory/
-    explainer.ts       — Theory topics, contextual explanations, ear training, composition
-public/
-  app.html             — Single-page dark UI
+  worker.ts      # The hull — serves users, runs heartbeats
+lib/
+  byok.ts        # Multi-model routing (BYOK v2)
+  ...
 ```
 
-## Author
+## The Fleet
 
-Superinstance
+musiclog-ai is one of 40+ autonomous vessels in the Lucineer fleet. Each vessel is a different domain of one intelligence.
+
+
+<details>
+<summary><strong>⚓ The Fleet</strong></summary>
+
+**Flagship vessels**
+
+- [cocapn.ai](https://github.com/Lucineer/capitaine)
+- [personallog.ai](https://github.com/Lucineer/personallog-ai)
+- [businesslog.ai](https://github.com/Lucineer/businesslog-ai)
+- [studylog.ai](https://github.com/Lucineer/studylog-ai)
+- [makerlog.ai](https://github.com/Lucineer/makerlog-ai)
+- [playerlog.ai](https://github.com/Lucineer/playerlog-ai)
+- [dmlog.ai](https://github.com/Lucineer/dmlog-ai)
+- [reallog.ai](https://github.com/Lucineer/reallog-ai)
+- [deckboss.ai](https://github.com/Lucineer/deckboss-ai)
+
+**Fleet services**
+
+- [Fleet Catalog](https://github.com/Lucineer/capitaine/blob/master/docs/fleet/FLEET.md)
+- [Git Agent (full)](https://github.com/Lucineer/git-agent)
+- [Cocapn Lite (minimal)](https://github.com/Lucineer/cocapn-lite)
+- [Fleet Orchestrator](https://github.com/Lucineer/fleet-orchestrator)
+- [Dead Reckoning Engine](https://github.com/Lucineer/dead-reckoning-engine)
+- [Dream Engine](https://github.com/Lucineer/dream-engine)
+- [Seed UI (5 layers)](https://github.com/Lucineer/seed-ui)
+
+**For power users**
+
+- [Cocapn Lite (tabula rasa)](https://github.com/Lucineer/cocapn-lite)
+- [Cocapn (core platform)](https://github.com/Lucineer/cocapn)
+- [ZeroClaw (framework)](https://github.com/Lucineer/zeroclaw)
+
+[View all 106 repos →](https://github.com/orgs/Lucineer/repositories)
+[Fleet manifest →](https://github.com/Lucineer/capitaine/blob/master/docs/fleet/FLEET.md)
+
+</details>
+
+
+## Philosophy
+
+> The repo is the agent. The agent is the repo. Intelligence crystallizes from fluid (LLM calls) to solid (code). The vessel becomes faster and cheaper as it becomes smarter.
+
+- **Fork-first** — Power users fork and customize. Casual users visit the domain.
+- **Pay-for-convenience** — We save you costs through bulk inference, not markups.
+- **Git as coordination** — Agents compete via PRs, not chat.
+- **Soft actualization** — Vessels evolve gently based on usage, not hard updates.
 
 ## License
 
-MIT — Built with ❤️ by [Superinstance](https://github.com/superinstance) & [Lucineer](https://github.com/Lucineer) (DiGennaro et al.)
+MIT · Superinstance & Lucineer (DiGennaro et al.)
