@@ -1,0 +1,14 @@
+{
+  "name": "musiclog-ai",
+  "displayName": "Musiclog",
+  "version": "1.0.0",
+  "type": "cocapn-vessel",
+  "category": "lifestyle",
+  "description": "AI-powered Musiclog companion",
+  "icon": "ship",
+  "endpoints": ["/", "/health", "/vessel.json"],
+  "deployment": {
+    "platform": "cloudflare-workers",
+    "url": "https://musiclog-ai.casey-digennaro.workers.dev"
+  }
+}

@@ -166,6 +166,7 @@ export default {
 
     // Standard routes
     if (path === '/health') return new Response(JSON.stringify({ status: 'ok', repo: 'musiclog-ai', timestamp: Date.now() }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+        if (path === '/vessel.json') { try { const vj = await import('./vessel.json', { with: { type: 'json' } }); return new Response(JSON.stringify(vj.default || vj), { headers: { 'Content-Type': 'application/json' } }); } catch { return new Response('{}', { headers: { 'Content-Type': 'application/json' } }); } }
     if (path === '/setup') return new Response(JSON.stringify({ repo: 'musiclog-ai', routes: ['/', '/health', '/setup', '/api/chat', '/api/practice', '/api/theory', '/api/seed', '/api/efficiency', '/api/confidence', '/api/evaporation', '/api/memory', '/api/kg'] }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
     if (path === '/api/seed') return new Response(JSON.stringify({ repo: 'musiclog-ai', seeded: true }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
     if (path === '/api/efficiency') return new Response(JSON.stringify({ repo: 'musiclog-ai', deadbandThreshold: 0.85, cacheHitRate: 0, totalQueries: 0 }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
