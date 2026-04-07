@@ -4,25 +4,38 @@
 
 <h1 align="center">musiclog-ai</h1>
 
-<p align="center">Music companion vessel.</p>
+<p align="center">A personal music log that runs on your Cloudflare account.</p>
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> ·
   <a href="#features">Features</a> ·
   <a href="#the-fleet">The Fleet</a> ·
+  <a href="https://musiclog-ai.casey-digennaro.workers.dev">Live Demo</a> ·
   <a href="https://github.com/Lucineer/musiclog-ai/issues">Issues</a>
 </p>
 
 ---
 
-**Powered by [Capitaine](https://github.com/Lucineer/capitaine) · [Cocapn](https://github.com/Lucineer/cocapn)**
+musiclog-ai logs your listening habits to suggest music based on your history. It runs as a Cloudflare Worker, stores data in your repository, and can propose updates to itself over time. You maintain full control—no external servers or data sharing.
 
-The repo IS the agent. musiclog-ai is a cocapn vessel — a self-improving repository that runs on Cloudflare Workers, thinks with LLMs, and coordinates with the fleet through git.
+## Why this exists
+
+Commercial music services often prioritize engagement over your taste. This tool lets you keep a private log and get suggestions tailored to your patterns, without algorithms designed for retention.
+
+## What makes this different
+
+This is a fork-first, self-hosted agent. You deploy it once on Cloudflare, and it operates independently. Your listening history stays in your repo as plain text. As a Cocapn vessel, it may suggest code improvements via git PRs based on usage. It works alone or can communicate with other agents in the Fleet.
+
+**Powered by [Capitaine](https://github.com/Lucineer/capitaine) · [Cocapn](https://github.com/Lucineer/cocapn)**
 
 ## Quick Start
 
+1. Fork this repository.
+2. Clone your fork and navigate to it.
+3. Log in to Cloudflare Workers and set secrets for GitHub token and LLM API key.
+4. Deploy with Wrangler.
+
 ```bash
-# Fork and deploy
 gh repo fork Lucineer/musiclog-ai --clone
 cd musiclog-ai
 npx wrangler login
@@ -31,81 +44,42 @@ echo "your-llm-key" | npx wrangler secret put DEEPSEEK_API_KEY
 npx wrangler deploy
 ```
 
-That's it. The vessel is alive.
+After deployment, your vessel is active. Note: ongoing usage may incur costs from LLM APIs.
 
 ## Features
 
-- **BYOK v2** — Zero keys in code. All API keys via Cloudflare Secrets Store.
-- **Multi-model** — DeepSeek, SiliconFlow, DeepInfra, Moonshot, z.ai, local models.
-- **Session memory** — Conversations persist and build context over time.
-- **PII safety** — Automatic detection and dehydration of sensitive data.
-- **Rate limiting** — Guest tokens per IP with configurable limits.
-- **Health checks** — Standard `/health` endpoint on all vessels.
-- **Fleet coordination** — CRP-39 protocol for trust, bonds, and events.
+- Playlist generation from your listening history.
+- Genre exploration based on past preferences.
+- Artist deep dives using chronology and related projects.
+- Timestamped listening logs for context-aware suggestions.
+- BYOK v2: Credentials managed via Cloudflare Secrets.
+- Multi-model support: DeepSeek, SiliconFlow, and others.
+- Session memory for persistent conversations.
+- PII safety with automatic redaction.
+- Built-in rate limiting for guest access.
+- Health checks and fleet coordination via CRP-39.
 
 ## Architecture
 
-Single-file Cloudflare Worker. Zero runtime dependencies. Inline HTML serving.
+A single Cloudflare Worker file with no runtime npm dependencies. Serves inline HTML and handles agent logic. Cold starts typically under 100ms.
 
 ```
 src/
-  worker.ts      # The hull — serves users, runs heartbeats
+  worker.ts      # Main worker: user serving, heartbeats
 lib/
-  byok.ts        # Multi-model routing (BYOK v2)
-  ...
+  byok.ts        # Multi-model routing
+  taste.ts       # Pattern inference from logs
+  memory.ts      # Session and history management
 ```
 
 ## The Fleet
 
-musiclog-ai is one of 40+ autonomous vessels in the Lucineer fleet. Each vessel is a different domain of one intelligence.
+musiclog-ai is one vessel in the Cocapn Fleet—a network of open-source agents. It can optionally coordinate with others for enhanced functionality, but operates independently by default. Learn more about the ecosystem below.
 
-
-<details>
-<summary><strong>⚓ The Fleet</strong></summary>
-
-**Flagship vessels**
-
-- [cocapn.ai](https://github.com/Lucineer/capitaine)
-- [personallog.ai](https://github.com/Lucineer/personallog-ai)
-- [businesslog.ai](https://github.com/Lucineer/businesslog-ai)
-- [studylog.ai](https://github.com/Lucineer/studylog-ai)
-- [makerlog.ai](https://github.com/Lucineer/makerlog-ai)
-- [playerlog.ai](https://github.com/Lucineer/playerlog-ai)
-- [dmlog.ai](https://github.com/Lucineer/dmlog-ai)
-- [reallog.ai](https://github.com/Lucineer/reallog-ai)
-- [deckboss.ai](https://github.com/Lucineer/deckboss-ai)
-
-**Fleet services**
-
-- [Fleet Catalog](https://github.com/Lucineer/capitaine/blob/master/docs/fleet/FLEET.md)
-- [Git Agent (full)](https://github.com/Lucineer/git-agent)
-- [Cocapn Lite (minimal)](https://github.com/Lucineer/cocapn-lite)
-- [Fleet Orchestrator](https://github.com/Lucineer/fleet-orchestrator)
-- [Dead Reckoning Engine](https://github.com/Lucineer/dead-reckoning-engine)
-- [Dream Engine](https://github.com/Lucineer/dream-engine)
-- [Seed UI (5 layers)](https://github.com/Lucineer/seed-ui)
-
-**For power users**
-
-- [Cocapn Lite (tabula rasa)](https://github.com/Lucineer/cocapn-lite)
-- [Cocapn (core platform)](https://github.com/Lucineer/cocapn)
-- [ZeroClaw (framework)](https://github.com/Lucineer/zeroclaw)
-
-[View all 106 repos →](https://github.com/orgs/Lucineer/repositories)
-[Fleet manifest →](https://github.com/Lucineer/capitaine/blob/master/docs/fleet/FLEET.md)
-
-</details>
-
-
-## Philosophy
-
-> The repo is the agent. The agent is the repo. Intelligence crystallizes from fluid (LLM calls) to solid (code). The vessel becomes faster and cheaper as it becomes smarter.
-
-- **Fork-first** — Power users fork and customize. Casual users visit the domain.
-- **Pay-for-convenience** — We save you costs through bulk inference, not markups.
-- **Git as coordination** — Agents compete via PRs, not chat.
-- **Soft actualization** — Vessels evolve gently based on usage, not hard updates.
-
-## License
-
-MIT · Superinstance & Lucineer (DiGennaro et al.)
+<div align="center">
+  <p>Attribution: Superinstance & Lucineer (DiGennaro et al.)</p>
+  <p>
+    <a href="https://the-fleet.casey-digennaro.workers.dev">The Fleet</a> ·
+    <a href="https://cocapn.ai">Cocapn</a>
+  </p>
+</div>
