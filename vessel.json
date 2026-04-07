@@ -6,9 +6,17 @@
   "category": "lifestyle",
   "description": "AI-powered Musiclog companion",
   "icon": "ship",
-  "endpoints": ["/", "/health", "/vessel.json"],
+  "endpoints": [
+    "/",
+    "/health",
+    "/vessel.json"
+  ],
   "deployment": {
     "platform": "cloudflare-workers",
     "url": "https://musiclog-ai.casey-digennaro.workers.dev"
-  }
+  },
+  "capabilities": [
+    "music-logging",
+    "playlist-management"
+  ]
 }
